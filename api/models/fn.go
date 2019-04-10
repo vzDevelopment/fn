@@ -74,6 +74,10 @@ var (
 		code:  http.StatusConflict,
 		error: errors.New("Fn with specified name already exists"),
 	}
+	ErrFnsDisabled = err{
+		code:  http.StatusForbidden,
+		error: errors.New("Fn is disabled"),
+	}
 )
 
 // FnInvokeEndpointAnnotation is the annotation that exposes the fn invoke endpoint For want of a better place to put this it's here
@@ -96,6 +100,7 @@ type Fn struct {
 	Config Config `json:"config" db:"config"`
 	// Annotations allow additional configuration of a function, these are not passed to the function.
 	Annotations Annotations `json:"annotations,omitempty" db:"annotations"`
+	Enabled     int         `json:"enabled,omitempty" db:"enabled"`
 	// CreatedAt is the UTC timestamp when this function was created.
 	CreatedAt common.DateTime `json:"created_at,omitempty" db:"created_at"`
 	// UpdatedAt is the UTC timestamp of the last time this func was modified.

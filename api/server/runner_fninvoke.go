@@ -87,6 +87,11 @@ func (s *Server) ServeFnInvoke(c *gin.Context, app *models.App, fn *models.Fn) e
 }
 
 func (s *Server) fnInvoke(resp http.ResponseWriter, req *http.Request, app *models.App, fn *models.Fn, trig *models.Trigger) error {
+	// Checking here means we'll catch both trigger and invoke calls (i.e. curling the trigger point and `fn invoke blah`
+	if fn.Enabled == 0 {
+		return models.ErrFnsDisabled
+	}
+
 	// TODO: we should get rid of the buffers, and stream back (saves memory (+splice), faster (splice), allows streaming, don't have to cap resp size)
 	// buffer the response before writing it out to client to prevent partials from trying to stream
 	buf := bufPool.Get().(*bytes.Buffer)

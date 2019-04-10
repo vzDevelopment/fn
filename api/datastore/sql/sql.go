@@ -68,6 +68,7 @@ var tables = [...]string{
 	annotations text NOT NULL,
 	created_at varchar(256) NOT NULL,
 	updated_at varchar(256) NOT NULL,
+	enabled int NOT NULL DEFAULT 0,
     CONSTRAINT name_app_id_unique UNIQUE (app_id, name)
 );`,
 }
@@ -76,7 +77,7 @@ const (
 	appIDSelector     = `SELECT id, name, config, annotations, syslog_url, created_at, updated_at FROM apps WHERE id=?`
 	ensureAppSelector = `SELECT id FROM apps WHERE name=?`
 
-	fnSelector   = `SELECT id,name,app_id,image,memory,timeout,idle_timeout,config,annotations,created_at,updated_at FROM fns`
+	fnSelector   = `SELECT id,name,app_id,image,memory,timeout,idle_timeout,config,annotations,created_at,updated_at,enabled FROM fns`
 	fnIDSelector = fnSelector + ` WHERE id=?`
 
 	triggerSelector   = `SELECT id,name,app_id,fn_id,type,source,annotations,created_at,updated_at FROM triggers`
@@ -502,7 +503,8 @@ func (ds *SQLStore) InsertFn(ctx context.Context, newFn *models.Fn) (*models.Fn,
 				config,
 				annotations,
 				created_at,
-				updated_at
+				updated_at,
+				enabled
 			)
 			VALUES (
 				:id,
@@ -515,7 +517,8 @@ func (ds *SQLStore) InsertFn(ctx context.Context, newFn *models.Fn) (*models.Fn,
 				:config,
 				:annotations,
 				:created_at,
-				:updated_at
+				:updated_at,
+				:enabled
 			);`)
 
 		_, err = tx.NamedExecContext(ctx, query, fn)
@@ -560,7 +563,8 @@ func (ds *SQLStore) UpdateFn(ctx context.Context, fn *models.Fn) (*models.Fn, er
 				idle_timeout = :idle_timeout,
 				config = :config,
 				annotations = :annotations,
-				updated_at = :updated_at
+				updated_at = :updated_at,
+				enabled = :enabled
 			    WHERE id=:id;`)
 
 		_, err = tx.NamedExecContext(ctx, query, fn)
